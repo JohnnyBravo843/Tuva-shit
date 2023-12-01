@@ -5,6 +5,11 @@ Just copy paste the source code into Visual Studio Code and run the game in the 
 <details>
 <summary>Changelog</summary>
 
+## 1.1.0
+
+- Added animation for shooting the ball to the other side
+- Added extra delay for animation @ 200ms
+
 ## 1.0.0
 
 - Official release!

@@ -7,16 +7,24 @@ import random
 import time
 import os
 
+
 # Player class
 class Player:
     def __init__(self, name, high_score=0):
         self.name = name
         self.high_score = high_score
-        
+        self.opponents_defeated = {}
+
+    # Functions to increase the players score and show info
     def inc_score(self):
         self.high_score += 1
+
     def show_info(self):
         print(f"\nNAME:  {self.name}\nSCORE:  {self.high_score}")
+
+    def return_shot(self):
+        return random.randint(0, 1)
+
 
 # Opponent class
 class Contender:
@@ -24,12 +32,14 @@ class Contender:
         self.name = name
         self.difficulty = difficulty
         self.misschance = 100 - difficulty
-    
+
+    # Functions to get name and difficulty
     def get_name(self):
         return self.name
+
     def get_difficulty(self):
         return self.difficulty
-    
+
     # Function to return time window for different opponents
     def time_window(self):
         if self.difficulty == 5:
@@ -39,29 +49,36 @@ class Contender:
         elif self.difficulty == 1:
             return 0.9
         elif self.difficulty == 0:
-            return 0.6
-    
+            return 1
+
     # function that decides which side the opoonent will shoot the ball on
     def incomingShot(self):
-        if random.randint(0,100) > self.misschance:
+        if random.randint(0, 100) > self.misschance:
             return "miss"
-        return random.randint(0,1)
+        return random.randint(0, 1)
+
 
 # Function to wait for click
-def check_clicked_key(keyEn,KeyTo):
+def check_clicked_key(keyEn, KeyTo):
     while True:
         if keyboard.is_pressed(keyEn):
             return keyEn
         if keyboard.is_pressed(KeyTo):
             return KeyTo
-        time.sleep(0.05) 
+        time.sleep(0.05)
+
 
 # Dynamic variable to set time window for player to press key
 timeWindow = 0
 
 # Creating player object
-#os.system("cls")
-player = Player(input("=================================\nWelcome to Terminal Table Tennis! \n=================================\nChoose a name: "))
+os.system("cls")
+player = Player(
+    input(
+        "=================================\nWelcome to Terminal Table Tennis! \n=================================\nChoose a name: "
+    )
+)
+
 
 # The game function
 def game():
@@ -77,7 +94,7 @@ def game():
     def on_key_event(e):
         nonlocal opponent_choice
         if e.event_type == keyboard.KEY_DOWN:
-            if e.name in ['1', '2', '3', '4']:
+            if e.name in ["1", "2", "3", "4"]:
                 opponent_choice = e.name
                 keyboard.unhook_all()
 
@@ -96,16 +113,18 @@ def game():
         opponent = Contender("Wheat", 0)
 
     print(f"\nYou selected {opponent.get_name()} as your opponent, good luck!")
-    
+
     # Dynamic variable to change time window to shoot back based on difficulty
     timeWindow = opponent.time_window()
 
     # Game instructions
-    print("\nThe game is quite simple. When the game starts, there'll be a visual representation of a table tennis table.\nThe opponent will shoot the ball to either the left or right side of the table.\nYou have to press the corresponding key to hit the ball back.\nIf you hit the ball back, you get a point. If you miss, you lose.\nIf the opponent misses, you win. Good luck!\n(Use A and D to hit the ball back.)")
+    print(
+        "\nThe game is quite simple. When the game starts, there'll be a visual representation of a table tennis table.\nThe opponent will shoot the ball to either the left or right side of the table.\nYou have to press the corresponding key to hit the ball back.\nIf you hit the ball back, you get a point. If you miss, you lose.\nIf the opponent misses, you win. Good luck!\n(Use A and D to hit the ball back.)"
+    )
     print("\nPress SPACE to start or ESC to quit")
-    
+
     # Checks if player wanna start game or quit
-    if check_clicked_key("esc","space") == "esc":
+    if check_clicked_key("esc", "space") == "esc":
         return "Player quit"
     else:
         os.system("cls")
@@ -132,6 +151,14 @@ def game():
                 while time.time() - start < timeWindow:
                     if keyboard.is_pressed("a"):
                         player.inc_score()
+                        if player.return_shot() == 0:
+                            os.system("cls")
+                            print("|o| |\n-----\n| | |")
+                            time.sleep(0.2)
+                        else:
+                            os.system("cls")
+                            print("| |o|\n-----\n| | |")
+                        time.sleep(0.2)
                         break
                     if keyboard.is_pressed("d"):
                         os.system("cls")
@@ -140,21 +167,21 @@ def game():
                         player.show_info()
                         break
                     time.sleep(0.01)
-                
+
                 # If player doesn't press key in time, they lose
                 else:
                     os.system("cls")
                     print("Du brukte for lang tid!")
                     player.show_info()
                     break
-                
+
             # Logic if opponent shoots right
             elif shot == 1:
                 print("| | |\n-----\n| |o|")
                 time.sleep(0.3)
 
                 # While loop to wait for keypress
-                while time.time()-start < timeWindow:
+                while time.time() - start < timeWindow:
                     if keyboard.is_pressed("a"):
                         os.system("cls")
                         playing = False
@@ -163,9 +190,17 @@ def game():
                         break
                     if keyboard.is_pressed("d"):
                         player.inc_score()
+                        if player.return_shot() == 0:
+                            os.system("cls")
+                            print("|o| |\n-----\n| | |")
+                            time.sleep(0.2)
+                        else:
+                            os.system("cls")
+                            print("| |o|\n-----\n| | |")
+                        time.sleep(0.2)
                         break
                     time.sleep(0.01)
-                
+
                 # If player doesn't press key in time, they lose
                 else:
                     os.system("cls")
@@ -173,12 +208,14 @@ def game():
                     print("Du brukte for lang tid!")
                     player.show_info()
                     break
-            
+
             # Logic if opponent misses
             elif shot == "miss":
                 print(f"{opponent.get_name()} missed the ball, you win!")
+                # player.add_defeated_opponent(opponent.get_name())
                 player.show_info()
                 playing = False
+
 
 # Start game
 game()
@@ -186,9 +223,8 @@ game()
 # Loop to keep game going until player quits
 gameContinue = True
 while gameContinue:
-    
     print("\nWanna continue playing? (y/n): ")
-    answer = check_clicked_key("y","n")
+    answer = check_clicked_key("y", "n")
     if answer == "y":
         game()
     elif answer == "n":

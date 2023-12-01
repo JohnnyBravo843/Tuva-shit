@@ -13,6 +13,7 @@ class Player:
     def __init__(self, name, high_score=0):
         self.name = name
         self.high_score = high_score
+        self.loss_count = 0
         self.opponents_defeated = {}
 
     # Functions to increase the players score and show info
@@ -20,10 +21,18 @@ class Player:
         self.high_score += 1
 
     def show_info(self):
-        print(f"\nNAME:  {self.name}\nSCORE:  {self.high_score}")
+        print(f"\nNAME:  {self.name}\nSCORE:  {self.high_score}\nLOSSES: {self.loss_count}\n {self.opponents_defeated}")
 
     def return_shot(self):
         return random.randint(0, 1)
+    
+    def add_defeated_enemy(self, opponent_name):
+        if opponent_name not in self.opponents_defeated:
+            self.opponents_defeated[opponent_name] = 1
+        else:
+            self.opponents_defeated[opponent_name] += 1
+    def inc_losscount(self):
+        self.loss_count += 1
 
 
 # Opponent class
@@ -50,6 +59,8 @@ class Contender:
             return 0.9
         elif self.difficulty == 0:
             return 1
+        elif self.difficulty == 3:
+            return 0.5
 
     # function that decides which side the opoonent will shoot the ball on
     def incomingShot(self):
@@ -87,14 +98,15 @@ def game():
     print("1. Greg  (Easy)")
     print("2. Bob   (Medium)")
     print("3. Dylan (Hard)")
-    print("4. Wheat (Impossible)")
+    print("4. Wheat (Demon)")
+    print("5. Infinity")
 
     opponent_choice = None
 
     def on_key_event(e):
         nonlocal opponent_choice
         if e.event_type == keyboard.KEY_DOWN:
-            if e.name in ["1", "2", "3", "4"]:
+            if e.name in ["1", "2", "3", "4", "5"]:
                 opponent_choice = e.name
                 keyboard.unhook_all()
 
@@ -110,7 +122,9 @@ def game():
     elif opponent_choice == "3":
         opponent = Contender("Dylan", 1)
     elif opponent_choice == "4":
-        opponent = Contender("Wheat", 0)
+        opponent = Contender("Wheat", 3)
+    elif opponent_choice == "5":
+        opponent = Contender("Infinity", 0)
 
     print(f"\nYou selected {opponent.get_name()} as your opponent, good luck!")
 
@@ -164,6 +178,8 @@ def game():
                         os.system("cls")
                         playing = False
                         print("You missed the ball!")
+                        player.inc_losscount()
+
                         player.show_info()
                         break
                     time.sleep(0.01)
@@ -172,6 +188,7 @@ def game():
                 else:
                     os.system("cls")
                     print("Du brukte for lang tid!")
+                    player.inc_losscount()
                     player.show_info()
                     break
 
@@ -186,6 +203,7 @@ def game():
                         os.system("cls")
                         playing = False
                         print("You missed the ball!")
+                        player.inc_losscount()
                         player.show_info()
                         break
                     if keyboard.is_pressed("d"):
@@ -204,15 +222,15 @@ def game():
                 # If player doesn't press key in time, they lose
                 else:
                     os.system("cls")
-
                     print("Du brukte for lang tid!")
+                    player.inc_losscount()
                     player.show_info()
                     break
 
             # Logic if opponent misses
             elif shot == "miss":
                 print(f"{opponent.get_name()} missed the ball, you win!")
-                # player.add_defeated_opponent(opponent.get_name())
+                player.add_defeated_enemy(opponent.get_name())
                 player.show_info()
                 playing = False
 
